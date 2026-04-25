@@ -1,121 +1,77 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
+import GameSection from './components/game-section'
+
+function GenerateCards() {
+    return Array.from({ length: 15 }, (_, i) => ({
+        id: i + 1,
+        src: `https://picsum.photos/seed/${i + 1}/300/450`
+    }));
+}
+
+function shuffle(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [cards, setCards] = useState(GenerateCards())
+  const [clickedCardIds, setClickedCardIds] = useState([])
+  const [currentScore, setCurrentScore] = useState(0)
+  const [highScore, setHighScore] = useState(0)
 
+  const handleCardClick = (id) => {
+    if (clickedCardIds.includes(id)) {
+        setCurrentScore(0);
+        setClickedCardIds([]);
+        alert('Game Over! You clicked the same card twice.');
+    } else {
+        const newScore = currentScore + 1;
+        setCurrentScore(newScore);
+        setClickedCardIds([...clickedCardIds, id]);
+        
+        if (newScore > highScore) {
+            setHighScore(newScore);
+        }
+
+        if (newScore === cards.length) {
+            alert('Congratulations! You clicked all cards once!');
+            setCurrentScore(0);
+            setClickedCardIds([]);
+        }
+    }
+    setCards(shuffle(cards));
+  }
+  
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
+    <div className="app-container">
+      <header id="header">
+        <div className="header-content">
+          <h1>Memory Card Game</h1>
           <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+            Try to press all cards once without repeating!
           </p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div className="score-board">
+            <div className="score">
+                <span>Score</span>
+                <strong>{currentScore}</strong>
+            </div>
+            <div className="score">
+                <span>Best</span>
+                <strong>{highScore}</strong>
+            </div>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      </header>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      <main>
+        <GameSection Cards={cards} onCardClick={handleCardClick} />
+      </main>
+    </div>
   )
 }
 
